@@ -1,0 +1,49 @@
+services:
+  server:
+    build: ./server
+    restart: always
+    command: "yarn dev"
+    ports:
+      - 9000:9000
+    env_file:
+      - ./.env
+    volumes:
+      - ./server/src:/server/src
+      - ./server/package.json:/server/package.json
+      - ./server/tsconfig.json:/server/tsconfig.json
+      - ./server/yarn.lock:/server/yarn.lock
+    networks:
+      - primary-network
+
+  redis-cache:
+    image: redis:6.2-alpine
+    restart: always
+    environment:
+      - REDIS_PWD=${REDIS_PWD}
+    ports:
+      - "6379:6379"
+    command: redis-server --save 20 1 --loglevel warning --user root --requirepass $REDIS_PWD
+    volumes:
+      - cache:/data
+    networks:
+      - primary-network
+
+  mongo-db:
+    image: mongo:6-jammy
+    ports:
+      - "27017:27017"
+    volumes:
+      - dbdata:/data/db
+    networks:
+      - primary-network
+
+volumes:
+  cache:
+    driver: local
+  dbdata:
+    driver: local
+
+networks:
+  primary-network:
+    name: primary-network
+    driver: bridge
