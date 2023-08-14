@@ -15,6 +15,9 @@ RUN yarn
 # Bundle app source
 COPY . .
 
+RUN yarn build
+
 EXPOSE 9000
+
 
 CMD [ "node", "dist/app.js" ]
