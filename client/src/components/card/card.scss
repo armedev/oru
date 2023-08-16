@@ -1,6 +1,7 @@
 .card {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   width: 250px;
   background-color: #dddddd;
   padding: 20px;
@@ -17,5 +18,10 @@
         font-weight: 600;
       }
     }
+  }
+
+  & > img {
+    width: 60px;
+    height: 60px;
   }
 }
