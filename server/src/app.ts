@@ -203,8 +203,11 @@ app.post("/api/update-user", jwtMiddleware, async (req: JwtRequest, res) => {
       pictureUrl: storedUser.pictureUrl,
 
       connections: updateUserInput.connections
-        ? [...storedUser.connections, new ObjectId(updateUserInput.connections)]
-        : storedUser.connections,
+        ? [
+            ...storedUser.connections.map((sc: string) => new ObjectId(sc)),
+            new ObjectId(updateUserInput.connections),
+          ]
+        : storedUser.connections.map((sc: string) => new ObjectId(sc)),
 
       name: updateUserInput.name || storedUser.name,
       phoneNo: updateUserInput.phoneNo || storedUser.phoneNo,
@@ -239,11 +242,8 @@ app.post("/api/update-user", jwtMiddleware, async (req: JwtRequest, res) => {
     return res.status(500).send({ error: err.message });
   }
 });
-app.get("/api/dummy-users", jwtMiddleware, async (req: JwtRequest, res) => {
+app.get("/api/dummy-users", async (_: JwtRequest, res) => {
   try {
-    let payload = req.auth;
-    if (!payload) return res.status(401).send({ error: "unauthorized" });
-
     const db = await connect();
     const provider = new UserData(db);
 
