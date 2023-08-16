@@ -28,7 +28,11 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(
   cors({
-    origin: ["http://localhost:5173", "http://192.168.29.99:5173"],
+    origin: [
+      "https://mobilicis-oru.netlify.app",
+      "http://localhost:5173",
+      "http://192.168.29.99:5173",
+    ],
     credentials: true,
   })
 );
