@@ -1,3 +1,8 @@
+## Hosted Endpoints
+
+- server: https://oru-epiratesdev.b4a.run
+- client: https://mobilicis-oru.netlify.app
+
 ## Server
 
 The server has been hosted on the [back4app](https://containers.back4app.com) container services using docker container
@@ -31,5 +36,5 @@ docker compose up --build
 yarn dev
 ```
 
-> [!Info]
+> [!warning]
 > Kindly verify and debug the env and cors options
