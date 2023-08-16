@@ -1,0 +1,113 @@
+@import "../../utils/include-media.scss";
+
+.sidebar_toggler {
+  // width: 250px;
+  background-color: #000;
+  border-radius: 40px;
+  border-top-left-radius: 0px;
+  border-bottom-left-radius: 0px;
+  padding: 20px 10px;
+  position: fixed;
+  // top: 10px;
+
+  @include media("<tablet") {
+    top: 10px;
+  }
+
+  z-index: 100;
+}
+
+.toggler {
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  background-color: #000;
+  border-radius: 50%;
+  cursor: pointer;
+  z-index: 10;
+
+  transition: filter 500ms ease;
+
+  @include media("<tablet") {
+    width: 30px;
+    height: 30px;
+  }
+
+  &:hover {
+    filter: drop-shadow(1px 1px 4px #fff);
+  }
+
+  span {
+    pointer-events: none;
+  }
+}
+
+.sidebar {
+  color: #fff;
+  background-color: #000;
+  border-radius: 20px;
+  border-top-left-radius: 0px;
+  border-bottom-left-radius: 0px;
+  width: 250px;
+  height: 91vh;
+  padding: 30px;
+  padding-right: 60px;
+  margin-left: 20px;
+
+  display: flex;
+  flex-direction: column;
+
+  @include media("<tablet") {
+    width: 90vw;
+  }
+  // align-items: center;
+
+  &__header {
+    height: 10%;
+    width: 100%;
+    font-size: 36px;
+    font-weight: 700;
+  }
+
+  &__body {
+    height: 70%;
+    width: 100%;
+
+    display: flex;
+    align-items: flex-start;
+    flex-direction: column;
+
+    span {
+      width: 100%;
+      margin: 10px 0px;
+      cursor: pointer;
+      padding: 2px;
+
+      &.selected {
+        font-weight: 700;
+      }
+
+      img {
+        margin: 0px 10px;
+      }
+    }
+  }
+
+  &__footer {
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-end;
+    flex-direction: column;
+
+    height: 20%;
+    width: 100%;
+
+    span {
+      margin: 10px 0px;
+      cursor: pointer;
+    }
+  }
+}

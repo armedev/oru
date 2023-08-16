@@ -10,10 +10,12 @@ import {
   JwtRequest,
 } from "./configs/jwt";
 import cookieParser from "cookie-parser";
+import cors from "cors";
 import { ExperienceDataSchema } from "./handlers/experience";
 import { CertificationDataSchema } from "./handlers/certification";
 import { EducationDataSchema } from "./handlers/education";
 import { connectRedis } from "./configs/redis";
+import { ObjectId } from "mongodb";
 
 //constants
 const cookieAge = 2 * 24 * 60 * 60 * 1000;
@@ -24,6 +26,12 @@ const port = process.env.SERVER_PORT;
 const app = express();
 app.use(express.json());
 app.use(cookieParser());
+app.use(
+  cors({
+    origin: ["http://localhost:5173", "http://192.168.29.99:5173"],
+    credentials: true,
+  })
+);
 
 app.get("/health", (_, res) => res.send("hello"));
 
@@ -78,6 +86,7 @@ app.post("/api/signup", async (req, res) => {
       certifications: [],
       experiences: [],
       educations: [],
+      connections: [],
     };
 
     const inserted = await provider.createUser(user);
@@ -121,6 +130,9 @@ app.post("/api/login", async (req, res) => {
       .cookie("oru", refreshToken, {
         maxAge: cookieAge, //2 * 24 * 60 * 60 * 1000
         httpOnly: true,
+        sameSite: "none",
+        secure: true,
+        path: "/",
       })
       .send({
         data: {
@@ -149,13 +161,7 @@ app.post("/api/refresh-token", async (req, res) => {
     });
   } catch (err: any) {
     console.error(err);
-    return res
-      .cookie("oru", "", {
-        maxAge: 0,
-        httpOnly: true,
-      })
-      .status(401)
-      .send({ error: err.message });
+    return res.clearCookie("oru").status(401).send({ error: err.message });
   }
 });
 
@@ -167,6 +173,7 @@ type UpdateUserInput = {
   certifications: CertificationDataSchema | null;
   experiences: ExperienceDataSchema | null;
   educations: EducationDataSchema | null;
+  connections: string;
 };
 
 app.post("/api/update-user", jwtMiddleware, async (req: JwtRequest, res) => {
@@ -190,6 +197,10 @@ app.post("/api/update-user", jwtMiddleware, async (req: JwtRequest, res) => {
       email: storedUser.email,
       hashedPass: storedUser.hashedPass,
       pictureUrl: storedUser.pictureUrl,
+
+      connections: updateUserInput.connections
+        ? [...storedUser.connections, new ObjectId(updateUserInput.connections)]
+        : storedUser.connections,
 
       name: updateUserInput.name || storedUser.name,
       phoneNo: updateUserInput.phoneNo || storedUser.phoneNo,
@@ -223,6 +234,41 @@ app.post("/api/update-user", jwtMiddleware, async (req: JwtRequest, res) => {
     console.error(err);
     return res.status(500).send({ error: err.message });
   }
+});
+app.get("/api/dummy-users", jwtMiddleware, async (req: JwtRequest, res) => {
+  try {
+    let payload = req.auth;
+    if (!payload) return res.status(401).send({ error: "unauthorized" });
+
+    const db = await connect();
+    const provider = new UserData(db);
+
+    const connections = await provider.getUsers("111");
+    return res.send({ data: connections });
+  } catch (err: any) {
+    console.error(err);
+    return res.status(500).send({ error: err.message });
+  }
+});
+
+app.get("/api/connections", jwtMiddleware, async (req: JwtRequest, res) => {
+  try {
+    let payload = req.auth;
+    if (!payload) return res.status(401).send({ error: "unauthorized" });
+
+    const db = await connect();
+    const provider = new UserData(db);
+
+    const connections = await provider.getConnections(payload.email);
+    return res.send({ data: connections });
+  } catch (err: any) {
+    console.error(err);
+    return res.status(500).send({ error: err.message });
+  }
+});
+
+app.get("/api/logout", (_, res) => {
+  res.clearCookie("oru").status(200).send();
 });
 
 app.listen(port, () => {

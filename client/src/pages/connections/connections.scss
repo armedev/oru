@@ -1,0 +1,23 @@
+.connections {
+  display: flex;
+  flex-direction: column;
+  gap: 50px;
+
+  & > div {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    width: 100%;
+
+    & > span {
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    & > div {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+  }
+}

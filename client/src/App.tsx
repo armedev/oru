@@ -1,35 +1,50 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useEffect, useState } from "react";
+import "./App.scss";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { serverAxios } from "./utils/axios";
+import Auth from "./pages/auth/auth.component";
+import Home from "./pages/home/home.component";
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [token, setToken] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    const fetchAccessToken = async () => {
+      setLoading(true);
+      if (token) return;
+      try {
+        let res = await serverAxios(token).post("/api/refresh-token", {});
+        if (res.status === 200) setToken(res.data.data.accessToken);
+        else setToken(null);
+      } catch (err) {
+        setToken(null);
+      }
+      setLoading(false);
+    };
+
+    fetchAccessToken();
+  }, []);
 
   return (
-    <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <div className="App">
+      {loading ? (
+        <span>Loading...</span>
+      ) : (
+        <BrowserRouter>
+          <Routes>
+            <Route
+              path={"/"}
+              Component={() => <Home token={token} setToken={setToken} />}
+            />
+            <Route
+              path={"/auth"}
+              Component={() => <Auth token={token} setToken={setToken} />}
+            />
+          </Routes>
+        </BrowserRouter>
+      )}
+    </div>
+  );
 }
 
-export default App
+export default App;

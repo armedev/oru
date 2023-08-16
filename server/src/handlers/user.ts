@@ -2,6 +2,7 @@ import { Db, ObjectId, Collection } from "mongodb";
 import { CertificationDataSchema } from "./certification";
 import { ExperienceDataSchema } from "./experience";
 import { EducationDataSchema } from "./education";
+import { ConnectionDataSchema } from "./connection";
 
 export type UserDataSchema = {
   email: string;
@@ -16,6 +17,7 @@ export type UserDataSchema = {
   certifications: Array<CertificationDataSchema>;
   experiences: Array<ExperienceDataSchema>;
   educations: Array<EducationDataSchema>;
+  connections: Array<ObjectId>;
 };
 
 export class UserData {
@@ -75,6 +77,50 @@ export class UserData {
     } catch (err) {
       console.error(err);
       throw new Error("failed to updated user");
+    }
+  }
+  async getUsers(searchValue: string) {
+    try {
+      let connections: Array<ConnectionDataSchema> = [];
+      let user = await this.collection.find({ phoneNo: searchValue }).toArray();
+      let promises = user.map(async (connection) =>
+        connections.push({
+          name: connection.name,
+          email: connection.email,
+          about: connection.about,
+          key: connection._id.toString(),
+        })
+      );
+
+      await Promise.all(promises);
+
+      return connections;
+    } catch (err) {
+      console.error(err);
+      throw new Error("failed to retrive connections");
+    }
+  }
+
+  async getConnections(email: string) {
+    try {
+      let connections: Array<ConnectionDataSchema> = [];
+      let user = await this.collection.findOne({ email: email });
+      if (!user) throw new Error("failed to retrive user");
+      let promises = user.connections.map(async (id) => {
+        let connection = await this.collection.findOne({ _id: id });
+        if (connection)
+          connections.push({
+            name: connection.name,
+            email: connection.email,
+            about: connection.about,
+            key: connection._id.toString(),
+          });
+      });
+      await Promise.all(promises);
+      return connections;
+    } catch (err) {
+      console.error(err);
+      throw new Error("failed to retrive connections");
     }
   }
 }
