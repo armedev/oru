@@ -38,4 +38,5 @@ const Card: React.FC<Props> = ({ token, user, type, fetchThings }) => {
     </div>
   );
 };
+
 export default Card;
